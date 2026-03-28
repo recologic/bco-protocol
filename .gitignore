@@ -1,0 +1,33 @@
+node_modules/
+artifacts/
+cache/
+coverage/
+coverage.json
+typechain-types/
+flattened/
+
+# Environment & secrets
+.env
+deployment-*.json
+
+# IDE
+.vscode/
+
+# Internal files
+CLAUDE.md
+report.md
+TEST_REPORT.md
+BCO_Contracts_Full.sol
+mythril-remappings.json
+remappings.txt
+hardhat.config.ts.bak
+
+# One-off internal scripts
+scripts/resume-deploy-nile.ts
+scripts/test-complete-nile.ts
+scripts/test-final-nile.ts
+scripts/test-nile.ts
+scripts/test-full-nile.ts
+scripts/test-accept-admin.ts
+scripts/test-permit-nile.ts
+scripts/test-security-nile.ts

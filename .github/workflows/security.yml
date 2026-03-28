@@ -1,0 +1,63 @@
+name: Security
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1" # Every Monday at 06:00 UTC
+
+jobs:
+  mythril:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compile
+        run: npx hardhat compile
+
+      - name: Install Mythril
+        run: pip install mythril
+
+      - name: Mythril — BCOToken
+        run: myth analyze contracts/BCOToken.sol --solc-json mythril.config.json --execution-timeout 300
+
+      - name: Mythril — DeedRegistry
+        run: myth analyze contracts/DeedRegistry.sol --solc-json mythril.config.json --execution-timeout 300
+
+      - name: Mythril — BCOStaking
+        run: myth analyze contracts/BCOStaking.sol --solc-json mythril.config.json --execution-timeout 300
+
+  aderyn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compile
+        run: npx hardhat compile
+
+      - name: Install Aderyn
+        run: cargo install aderyn
+
+      - name: Aderyn
+        run: aderyn . --skip-update-check
+
+      - name: Upload Aderyn report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aderyn-report
+          path: report.md

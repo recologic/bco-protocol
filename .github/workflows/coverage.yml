@@ -1,0 +1,47 @@
+name: Coverage
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Coverage
+        run: npx hardhat coverage
+
+      - name: Enforce 100% coverage
+        run: |
+          node -e "
+            const report = require('./coverage/coverage-summary.json');
+            const total = report.total;
+            const checks = ['statements', 'branches', 'functions', 'lines'];
+            let failed = false;
+            for (const c of checks) {
+              const pct = total[c].pct;
+              console.log(c + ': ' + pct + '%');
+              if (pct < 100) {
+                console.error('FAIL: ' + c + ' coverage is ' + pct + '%, expected 100%');
+                failed = true;
+              }
+            }
+            if (failed) process.exit(1);
+            console.log('All coverage checks passed.');
+          "
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
